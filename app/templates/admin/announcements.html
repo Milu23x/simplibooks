@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Announcements - SimpliBooks Admin{% endblock %}
+{% block content %}
+
+<h4 class="mb-3">Broadcast Announcement</h4>
+
+<div class="card p-3 mb-3">
+  <form method="POST">
+    <div class="mb-2">
+      <textarea name="message" class="form-control" rows="3" placeholder="e.g. GST filing due date extended to 20th." required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Send to All Shopkeepers</button>
+  </form>
+</div>
+
+<div class="card p-3">
+  <h6 class="mb-2">Recent Announcements</h6>
+  <ul class="list-group list-group-flush">
+    {% for n in past %}
+    <li class="list-group-item px-0">
+      <div class="small text-muted">{{ n.date|ist_datetime }}</div>
+      {{ n.message }}
+    </li>
+    {% else %}
+    <li class="list-group-item px-0 text-muted">No announcements sent yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

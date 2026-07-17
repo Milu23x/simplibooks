@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}{{ invoice.invoice_number }} - SimpliBooks{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0">Invoice {{ invoice.invoice_number }}</h4>
+  <div>
+    <a href="{{ url_for('shopkeeper.invoice_pdf', invoice_id=invoice.id) }}" class="btn btn-outline-primary btn-sm">
+      <i class="bi bi-download"></i> Download PDF
+    </a>
+    <a href="{{ url_for('shopkeeper.invoices') }}" class="btn btn-outline-secondary btn-sm">Back</a>
+  </div>
+</div>
+
+<div class="card p-4 mb-3">
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <strong>{{ biz.business_name }}</strong><br>
+      {% if biz.gstin %}GSTIN: {{ biz.gstin }}<br>{% endif %}
+      <span class="text-muted small">{{ biz.address }}</span>
+    </div>
+    <div class="col-md-6 text-md-end">
+      <strong>Bill To:</strong> {{ invoice.customer_name }}<br>
+      {% if invoice.customer_state %}State: {{ invoice.customer_state }}<br>{% endif %}
+      Date: {{ invoice.date.strftime("%d %b %Y") }}
+    </div>
+  </div>
+
+  <table class="table">
+    <thead><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Tax %</th><th>Amount</th></tr></thead>
+    <tbody>
+      {% for item in invoice.items %}
+      <tr>
+        <td>{{ item.item_name }}</td>
+        <td>{{ item.qty }}</td>
+        <td>₹{{ "%.2f"|format(item.rate) }}</td>
+        <td>{{ item.tax_rate }}%</td>
+        <td>₹{{ "%.2f"|format(item.amount) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="row justify-content-end">
+    <div class="col-md-4">
+      <div class="d-flex justify-content-between"><span>Subtotal</span><span>₹{{ "%.2f"|format(invoice.subtotal) }}</span></div>
+      <div class="d-flex justify-content-between"><span>Tax</span><span>₹{{ "%.2f"|format(invoice.tax_amount) }}</span></div>
+      <hr>
+      <div class="d-flex justify-content-between fw-bold"><span>Total</span><span>₹{{ "%.2f"|format(invoice.total_amount) }}</span></div>
+      <div class="d-flex justify-content-between text-success"><span>Paid</span><span>₹{{ "%.2f"|format(invoice.amount_paid) }}</span></div>
+      <div class="d-flex justify-content-between text-danger fw-bold"><span>Balance Due</span><span>₹{{ "%.2f"|format(invoice.balance_due) }}</span></div>
+    </div>
+  </div>
+</div>
+
+{% if invoice.payments %}
+<div class="card p-3 mb-3">
+  <h6 class="mb-2">Payment History</h6>
+  <table class="table table-sm mb-0">
+    <thead><tr><th>Date</th><th>Mode</th><th class="text-end">Amount</th></tr></thead>
+    <tbody>
+      {% for p in invoice.payments|sort(attribute="date") %}
+      <tr>
+        <td>{{ p.date.strftime("%d %b %Y") }}</td>
+        <td><span class="badge {{ 'bg-success' if p.mode == 'upi' else 'bg-secondary' }}">{{ p.mode_label }}</span></td>
+        <td class="text-end">₹{{ "%.2f"|format(p.amount_paid) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if invoice.balance_due > 0 %}
+<div class="card p-3">
+  <h6 class="mb-2">Record a Payment</h6>
+  <form method="POST" action="{{ url_for('shopkeeper.invoice_add_payment', invoice_id=invoice.id) }}" class="row g-2">
+    <div class="col-md-3">
+      <input type="number" step="0.01" name="amount" class="form-control" placeholder="Amount" required>
+    </div>
+    <div class="col-md-3">
+      <select name="mode" class="form-select">
+        <option value="cash">Cash</option>
+        <option value="upi">UPI</option>
+        <option value="bank_transfer">Bank Transfer</option>
+        <option value="cheque">Cheque</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <input type="date" name="date" class="form-control" value="{{ today }}">
+    </div>
+    <div class="col-md-3">
+      <button type="submit" class="btn btn-primary">Add Payment</button>
+    </div>
+  </form>
+</div>
+{% endif %}
+
+{% endblock %}

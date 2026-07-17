@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard - SimpliBooks{% endblock %}
+{% block content %}
+
+<h4 class="mb-3">Platform Overview</h4>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card stat-card p-3">
+      <span class="text-muted small">Total Shopkeepers</span>
+      <span class="stat-value">{{ total_shopkeepers }}</span>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card income p-3">
+      <span class="text-muted small">Active Shopkeepers</span>
+      <span class="stat-value">{{ active_shopkeepers }}</span>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card profit p-3">
+      <span class="text-muted small">Total Invoices Generated</span>
+      <span class="stat-value">{{ total_invoices }}</span>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card expense p-3">
+      <span class="text-muted small">Total Expenses Logged</span>
+      <span class="stat-value">{{ total_expenses }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="card p-3">
+  <h6 class="mb-3">Recent Platform Activity</h6>
+  <table class="table table-sm">
+    <thead><tr><th>Time</th><th>User ID</th><th>Action</th></tr></thead>
+    <tbody>
+      {% for log in recent_activity %}
+      <tr>
+        <td>{{ log.timestamp.strftime("%d %b %Y, %H:%M") }}</td>
+        <td>{{ log.user_id }}</td>
+        <td>{{ log.action }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3" class="text-center text-muted py-3">No activity yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

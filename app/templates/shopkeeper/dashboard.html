@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - SimpliBooks{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="mb-0">{{ biz.business_name }}</h4>
+    <span class="text-muted small">Here's how your business is doing this month.</span>
+  </div>
+  <a href="{{ url_for('shopkeeper.invoice_new') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New Invoice</a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card stat-card income p-3">
+      <span class="text-muted small">Income (this month)</span>
+      <span class="stat-value">₹{{ "%.2f"|format(income_this_month) }}</span>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card expense p-3">
+      <span class="text-muted small">Expenses (this month)</span>
+      <span class="stat-value">₹{{ "%.2f"|format(expense_this_month) }}</span>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card profit p-3">
+      <span class="text-muted small">Profit / Loss (this month)</span>
+      <span class="stat-value">₹{{ "%.2f"|format(profit_this_month) }}</span>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card outstanding p-3">
+      <span class="text-muted small">Outstanding Payments</span>
+      <span class="stat-value">₹{{ "%.2f"|format(outstanding) }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card p-3">
+      <h6 class="mb-3">Income vs Expenses — Last 6 Months</h6>
+      <canvas id="trendChart" height="110"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card p-3">
+      <h6 class="mb-3">Recent Invoices</h6>
+      {% if recent_invoices %}
+        <ul class="list-group list-group-flush">
+          {% for inv in recent_invoices %}
+          <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+            <a href="{{ url_for('shopkeeper.invoice_view', invoice_id=inv.id) }}">{{ inv.invoice_number }}</a>
+            <span class="badge badge-{{ inv.status }}">₹{{ "%.0f"|format(inv.total_amount) }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted small mb-0">No invoices yet. Create your first one!</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const ctx = document.getElementById('trendChart');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: {{ trend_labels|tojson }},
+      datasets: [
+        { label: 'Income', data: {{ trend_income|tojson }}, borderColor: '#2e7d32', backgroundColor: 'rgba(46,125,50,0.1)', tension: 0.3, fill: true },
+        { label: 'Expenses', data: {{ trend_expense|tojson }}, borderColor: '#c62828', backgroundColor: 'rgba(198,40,40,0.1)', tension: 0.3, fill: true }
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+  });
+</script>
+{% endblock %}

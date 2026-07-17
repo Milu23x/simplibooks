@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Create Account - SimpliBooks{% endblock %}
+{% block content %}
+<div class="auth-wrapper">
+  <div class="card auth-card p-4">
+    <div class="card-body">
+      <h3 class="text-center brand-title mb-1"><i class="bi bi-journal-richtext"></i> SimpliBooks</h3>
+      <p class="text-center text-muted mb-4">Create your shopkeeper account</p>
+
+      <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+          {{ form.name.label(class="form-label") }}
+          {{ form.name(class="form-control") }}
+        </div>
+        <div class="mb-3">
+          {{ form.business_name.label(class="form-label") }}
+          {{ form.business_name(class="form-control", placeholder="e.g. Sharma General Store") }}
+        </div>
+        <div class="mb-3">
+          {{ form.email.label(class="form-label") }}
+          {{ form.email(class="form-control") }}
+        </div>
+        <div class="mb-3">
+          {{ form.password.label(class="form-label") }}
+          <div class="input-group">
+            {{ form.password(id='register-password', class="form-control") }}
+            <button type="button" class="btn btn-outline-secondary" id="toggle-register-password" tabindex="-1">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="mb-3">
+          {{ form.confirm_password.label(class="form-label") }}
+          <div class="input-group">
+            {{ form.confirm_password(id='confirm-password', class="form-control") }}
+            <button type="button" class="btn btn-outline-secondary" id="toggle-confirm-password" tabindex="-1">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+        {{ form.submit(class="btn btn-primary w-100") }}
+      </form>
+
+      <p class="text-center mt-3 mb-0 small">
+        Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a>
+      </p>
+      <p class="text-center mt-1 mb-0 small">
+        Looking to shop instead? <a href="{{ url_for('auth.register_buyer') }}">Create a buyer account</a>
+      </p>
+    </div>
+  </div>
+</div>
+    {% endblock %}
+    {% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const registerPassword = document.querySelector('#register-password');
+    const confirmPassword = document.querySelector('#confirm-password');
+    const toggleRegisterPassword = document.querySelector('#toggle-register-password');
+    const toggleConfirmPassword = document.querySelector('#toggle-confirm-password');
+
+    if (registerPassword && toggleRegisterPassword) {
+      toggleRegisterPassword.addEventListener('click', function () {
+        const type = registerPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+        registerPassword.setAttribute('type', type);
+        this.querySelector('i').classList.toggle('bi-eye');
+        this.querySelector('i').classList.toggle('bi-eye-slash');
+      });
+    }
+
+    if (confirmPassword && toggleConfirmPassword) {
+      toggleConfirmPassword.addEventListener('click', function () {
+        const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirmPassword.setAttribute('type', type);
+        this.querySelector('i').classList.toggle('bi-eye');
+        this.querySelector('i').classList.toggle('bi-eye-slash');
+      });
+    }
+  });
+</script>
+{% endblock %}

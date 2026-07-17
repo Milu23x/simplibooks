@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: Helvetica, Arial, sans-serif; color: #222; font-size: 13px; }
+  h1 { color: #2f5496; font-size: 22px; margin-bottom: 0; }
+  .muted { color: #777; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; }
+  th { background: #eaf0fb; }
+  .totals { width: 260px; margin-left: auto; margin-top: 16px; }
+  .totals div { display: flex; justify-content: space-between; padding: 3px 0; }
+  .grand-total { font-weight: bold; border-top: 2px solid #2f5496; padding-top: 6px; }
+</style>
+</head>
+<body>
+  <h1>{{ biz.business_name }}</h1>
+  <p class="muted">
+    {% if biz.gstin %}GSTIN: {{ biz.gstin }}<br>{% endif %}
+    {{ biz.address }} {% if biz.phone %}| {{ biz.phone }}{% endif %}
+  </p>
+
+  <table style="border:none; margin-top: 24px;">
+    <tr style="border:none;">
+      <td style="border:none;">
+        <strong>INVOICE #{{ invoice.invoice_number }}</strong><br>
+        Date: {{ invoice.date.strftime("%d %b %Y") }}
+      </td>
+      <td style="border:none; text-align:right;">
+        <strong>Bill To:</strong><br>
+        {{ invoice.customer_name }}<br>
+        {{ invoice.customer_state or "" }}
+      </td>
+    </tr>
+  </table>
+
+  <table>
+    <thead>
+      <tr><th>Item</th><th>Qty</th><th>Rate</th><th>Tax %</th><th>Amount</th></tr>
+    </thead>
+    <tbody>
+      {% for item in invoice.items %}
+      <tr>
+        <td>{{ item.item_name }}</td>
+        <td>{{ item.qty }}</td>
+        <td>Rs. {{ "%.2f"|format(item.rate) }}</td>
+        <td>{{ item.tax_rate }}%</td>
+        <td>Rs. {{ "%.2f"|format(item.amount) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="totals">
+    <div><span>Subtotal</span><span>Rs. {{ "%.2f"|format(invoice.subtotal) }}</span></div>
+    <div><span>Tax</span><span>Rs. {{ "%.2f"|format(invoice.tax_amount) }}</span></div>
+    <div class="grand-total"><span>Total</span><span>Rs. {{ "%.2f"|format(invoice.total_amount) }}</span></div>
+    <div><span>Paid</span><span>Rs. {{ "%.2f"|format(invoice.amount_paid) }}</span></div>
+    <div><span>Balance Due</span><span>Rs. {{ "%.2f"|format(invoice.balance_due) }}</span></div>
+  </div>
+
+  {% if invoice.payments %}
+  <h3 style="margin-top:28px; color:#2f5496; font-size:14px;">Payment Details</h3>
+  <table>
+    <thead>
+      <tr><th>Date</th><th>Mode</th><th>Amount Paid</th></tr>
+    </thead>
+    <tbody>
+      {% for p in invoice.payments|sort(attribute="date") %}
+      <tr>
+        <td>{{ p.date.strftime("%d %b %Y") }}</td>
+        <td>{{ p.mode_label }}</td>
+        <td>Rs. {{ "%.2f"|format(p.amount_paid) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p style="text-align:right; font-weight:bold; margin-top:6px;">
+    Payment Status:
+    {% if invoice.balance_due <= 0 %}PAID IN FULL{% elif invoice.amount_paid > 0 %}PARTIALLY PAID{% else %}UNPAID{% endif %}
+  </p>
+  {% endif %}
+
+  <p class="muted" style="margin-top:40px;">Generated via SimpliBooks &mdash; thank you for your business.</p>
+</body>
+</html>

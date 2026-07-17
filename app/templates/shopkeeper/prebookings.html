@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Pre-bookings - SimpliBooks{% endblock %}
+{% block content %}
+
+<h4 class="mb-3">Pre-bookings</h4>
+<p class="text-muted small">Shoppers who reserved a spot in line for your products — sorted first-booked, first-served.</p>
+
+<div class="card p-3">
+  <table class="table table-sm align-middle">
+    <thead><tr><th>#</th><th>Product</th><th>Customer</th><th>Phone</th><th>Booked On</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for pb in prebookings %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ pb.product.name }}</td>
+        <td>{{ pb.customer_name }}{% if pb.notes %}<br><span class="text-muted small">{{ pb.notes }}</span>{% endif %}</td>
+        <td>{{ pb.customer_phone }}{% if pb.customer_email %}<br><span class="text-muted small">{{ pb.customer_email }}</span>{% endif %}</td>
+        <td>{{ pb.created_at.strftime("%d %b %Y") }}</td>
+        <td>
+          {% if pb.status == "fulfilled" %}
+            <span class="badge bg-success">Fulfilled</span>
+          {% else %}
+            <span class="badge bg-warning text-dark">Pending</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if pb.status != "fulfilled" %}
+          <form method="POST" action="{{ url_for('shopkeeper.prebooking_fulfill', prebooking_id=pb.id) }}">
+            <button class="btn btn-outline-success btn-sm">Mark Fulfilled</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="text-muted text-center">No pre-bookings yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

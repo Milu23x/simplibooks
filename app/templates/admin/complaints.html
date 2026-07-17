@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Complaints - SimpliBooks Admin{% endblock %}
+{% block content %}
+
+<h4 class="mb-3">Complaints &amp; Contact Messages</h4>
+
+<div class="card p-3">
+  <table class="table table-sm align-middle">
+    <thead><tr><th>Date</th><th>Name</th><th>Contact</th><th>Store</th><th>Subject</th><th>Message</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for c in complaints %}
+      <tr>
+        <td>{{ c.created_at.strftime("%d %b %Y") }}</td>
+        <td>{{ c.name }}</td>
+        <td>{{ c.email or "" }}{% if c.phone %}<br>{{ c.phone }}{% endif %}</td>
+        <td>{{ c.business.business_name if c.business else "General" }}</td>
+        <td>{{ c.subject or "—" }}</td>
+        <td style="max-width:300px;">{{ c.message }}</td>
+        <td><span class="badge {{ 'bg-success' if c.status == 'resolved' else 'bg-warning text-dark' }}">{{ c.status|title }}</span></td>
+        <td>
+          <form method="POST" action="{{ url_for('admin.toggle_complaint', complaint_id=c.id) }}">
+            <button class="btn btn-outline-secondary btn-sm">{{ 'Reopen' if c.status == 'resolved' else 'Mark Resolved' }}</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" class="text-muted text-center">No messages yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
